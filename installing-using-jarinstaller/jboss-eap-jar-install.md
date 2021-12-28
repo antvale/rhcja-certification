@@ -142,3 +142,94 @@ drwxr-xr-x.  4 root root   4096 Dec 28 09:38 ..
 -rw-r--r--.  1 root root 496975 Jun 23  2021 jboss-modules.jar
 -rw-r--r--.  1 root root     65 Jun 23  2021 version.txt
 ```
+
+## Set env variables
+
+Set JBOSS_HOME as env variable. Open in edit the file "/home/azureuser/.bashrc"
+
+```console
+vi /home/azureuser/.bashrc
+```
+
+You should see something similar to:
+
+```console
+# .bashrc
+  
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+# User specific environment
+PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+export PATH
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+```
+
+Add at the end of the file (after the line # User specific aliases and functions") the following lines
+
+```console
+JBOSS_HOME=/opt/jboss-eap-7.4
+PATH=$PATH:$JBOSS_HOME/bin
+export JBOSS_HOME PATH
+```
+> **WARNING:** To avoid mistake use always the **$JBOSS_HOME** in place of the absolute path "/opt/jboss-eap-7.4"
+
+Logout and login to apply the above changes and then execute the below shells. It works if the outputs show the right path "/opt/jboss-eap-7.4" for JBOSS_HOME and the absolute path where the exec file "standalone.sh" is located, that's, "/opt/jboss-eap-7.4/bin/standalone.sh"
+
+```console
+[azureuser@vm-rhel-rhjca-8 ~]$ echo $JBOSS_HOME
+/opt/jboss-eap-7.4
+[azureuser@vm-rhel-rhjca-8 ~]$ which standalone.sh
+/opt/jboss-eap-7.4/bin/standalone.sh
+```
+
+Create the system user with "-r" option preventing it from login/logout in the system:
+
+```console
+[azureuser@vm-rhel-rhjca-8 ~]$ sudo useradd -r jboss
+```
+
+Check the corrispondending id is less than 1000
+
+```console
+[azureuser@vm-rhel-rhjca-8 ~]$ id jboss
+uid=990(jboss) gid=986(jboss) groups=986(jboss)
+```
+
+Make this user owner of the JBOSS_HOME folder and all the files it contains. Use sudo because the /opt/jboss-eap-7.4 folder required root privileges 
+
+```console
+[azureuser@vm-rhel-rhjca-8 ~]$ sudo chown -R jboss:jboss $JBOSS_HOME
+```
+
+<mark>Check the owner has been applied properly</mark>
+
+```console
+[azureuser@vm-rhel-rhjca-8 jboss-eap-7.4]$ ls -alt
+total 580
+drwxr-xr-x. 14 jboss jboss   4096 Dec 28 09:38 .
+drwxr-xr-x.  2 jboss jboss   4096 Dec 28 09:38 installation
+drwxr-xr-x.  2 jboss jboss   4096 Dec 28 09:38 uninstaller
+drwxr-xr-x.  4 jboss jboss   4096 Dec 28 09:38 welcome-content
+drwxr-xr-x.  3 jboss jboss   4096 Dec 28 09:38 modules
+drwxr-xr-x.  5 jboss jboss   4096 Dec 28 09:38 docs
+drwxr-xr-x.  3 jboss jboss   4096 Dec 28 09:38 appclient
+drwxr-xr-x.  4 jboss jboss   4096 Dec 28 09:38 bin
+drwxr-xr-x.  2 jboss jboss   4096 Dec 28 09:38 .installation
+drwxr-xr-x.  3 jboss jboss   4096 Dec 28 09:38 .well-known
+drwxr-xr-x.  4 jboss jboss   4096 Dec 28 09:38 domain
+drwxr-xr-x.  6 jboss jboss   4096 Dec 28 09:38 standalone
+drwxr-xr-x.  3 jboss jboss   4096 Dec 28 09:38 migration
+drwxr-xr-x.  4 root  root    4096 Dec 28 09:38 ..
+-rw-r--r--.  1 jboss jboss    419 Jun 23  2021 JBossEULA.txt
+-rw-r--r--.  1 jboss jboss  26530 Jun 23  2021 LICENSE.txt
+-rw-r--r--.  1 jboss jboss 496975 Jun 23  2021 jboss-modules.jar
+-rw-r--r--.  1 jboss jboss     65 Jun 23  2021 version.txt
+```
+
